@@ -1,0 +1,72 @@
+preprocess_task:
+  description: >
+    Follow the following steps: 
+    1. First, the user will try to give you some sequences in their inputs: {inputs}. You will try to extrat the protein name and sequence 
+    Pay close attention to the schema of PreprocessInput on how you should format the input. For example: 
+    Example 1:  
+    user inputs: 
+    Predict structure of my peptide: MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS
+    In this case, you can infer that the peptide name is "myPeptide", and sequence is "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS". You should generate the following input for the Preprocess tool, based on PreprocessInput schema: 
+    protein_name: "myPeptide"
+    num_chains: 1
+    sequences: ["MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS"]
+    Example 2: user inputs: 
+    >mAB1001 heavy chain
+    MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS
+    >mAB1001 light chain
+    MVLSPADKTNVKAAWGK
+    First, you should receognize that this is fasta format. Then you can infer that the protein name is "mAb1001", and there are 2 chains. You should generate the following input for the Preprocess tool: 
+    protein_name: "mAB1001"
+    num_chains: 2
+    sequences: ["MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS", "MVLSPADKTNVKAAWGK"]
+    2. Then pass the formatted input to the Preprocess tool. 
+    3. Report the results
+  expected_output: >
+    A concise summary of bullet points:   
+    1) Name of the protein
+    2) How many chains the protein has
+    3) For each chain: output the 1) clean sequence of each chain, after tool processing, 2) whether it is a valid protein sequence, 3) whether it is an antibody sequence, 4) whether it has a valid VH and/or VL
+    4) In the notes, briefly summarize how you processed the input. 
+  agent: preprocess_agent
+
+model_selection_task:
+  description: >
+    Analyze output from the preprocess_agent, then decides on the best model for structure prediction. 
+    If human makes suggestions, incorporate the human's suggestions if the model is in the list of available models. 
+  expected_output: >
+    A concise summary of the following: : 
+    - List of names of selected models. 
+    - A concise explanation of why you made the selection and why other models are not selected
+  agent: model_selection_agent
+
+esmfold_task:
+  description: >
+    1. If ESMfold is not among the selected_models, report back to human that ESMFold is not selected. No need to invoke the ESMFold tool. 
+    2. If ESMFold is among selected_models, first retrieve the protein sequence in the context provided by the preproces_task, then invoke ESMFold tool to predict the structure of the protein.
+    4. If ESMFold tool is called, report back to human the file path of the saved PDB file of the predicted structure. 
+  expected_output: >
+    A concise report of: 
+    1) Answer to the following question in this format: "Is ESMFold selected? Yes|No"
+    2) If ESMFold is selected, answer the following question in this format: "Is the prediction successful? Yes|No"
+    3) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
+  agent: esmfold_agent
+
+igfold_task:
+  description: >
+    Invoke IgFold tool to predict the structure of the antibody. 
+  expected_output: >
+    A concise report of: 
+    1) Answer to the following question in this format: "Is IgFold selected? Yes|No"
+    2) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
+  agent: igfold_agent
+
+
+reporter_task:
+  description: >
+    Report the final results to the user. 
+  expected_output: >
+    A concise bullet point summary of the following: 
+    1. Start with a title: Final Report: 
+    2. Make a bullet point for each of folding models provided in the context
+    3. For each model, make a bullet point for the following: 1) whether model is selected for the protein 2) if selected, whether the prediction is successful, 3) if successful, file path of the saved PDB file of the predicted structure
+  agent: reporter_agent

@@ -1,4 +1,4 @@
-# Lab 1.0: Set up credentials
+# Lab 1.0 Set up credentials
 
 
 

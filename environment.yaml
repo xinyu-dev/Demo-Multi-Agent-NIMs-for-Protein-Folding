@@ -1,0 +1,17 @@
+name: workshop
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pymol-open-source
+  - pip
+  - pip:
+      - crewai
+      - crewai-tools
+      - python-dotenv
+      - pandas
+      - numpy
+      - matplotlib
+      - loguru
+      - py3dmol
