@@ -28,16 +28,37 @@
 Similar step as above, but choose **Generate Personal Key** instead
 ![ngc-apikey-3](../images/ngc-apikey-3.jpg)
 
-## 2. Install dependencies
+## 2. Setting up environment for Lab 1.x
 
-> In the workshop, we provided a conda environment with all dependencies installed. If you want to set up on your own machine, please follow the steps below. 
+> For notebooks Lab 1.x, we will be using NIMs hosted by NVIDIA, with some locally installed models & packages. You can run it on your laptop (MacOs and Linux tested) even without GPU support. 
 
-### 2.1 Dependencies for Lab 1.1 through 1.2
+1. In SageMaker Studio, create a new Jupyterlab space. The following configuration 
+    ![sagemaker-studio-1](../images/sagemaker-studio-1.png)
+2. Once you're inside the JupyterLab, clone the repository and cd into the directory
+    ```bash
+    git clone https://github.com/xinyu-dev/2025-01-biologic-summit-workshop.git
+    ```
+3. CD into the directory
+    ```bash
+    cd 2025-01-biologic-summit-workshop
+    ```
+4. Then run the following command to create a new conda environment called `workshop`
+    ```bash
+    bash setup.sh
+    ```
+5. Once the environment is created, you might need to run 
+    ```bash
+    conda init
+    ```
+    Close the terminal, Then open a new one, and type
 
-Lab 1.1 and 1.2 utilizes NIMs and locally installed pacakges. They can be run on Linux or MacOS machines, and does not require a container or GPU support.
+    ```bash
+    conda activate workshop
+    ```
 
+## Setting up environment for Lab 2.x
 
-### 2.2 Dependencies for Lab 1.3
+Lab 2.x will utilize the BioNeMo Framework container for ESM2 training, finetuning, and inference, which has all the dependencies installed. Follow the steps below to set up the environment. 
 
 1. Launch the BioNeMo Framework container. We provide example guides on: 
     - [AWS EC2](https://xinyu-nvidia.gitbook.io/bionemo-gitbook/framework-setup/platform/ec2)
@@ -52,17 +73,19 @@ Lab 1.1 and 1.2 utilizes NIMs and locally installed pacakges. They can be run on
    ```
 4. If we are doing model pretraining/finetuning/inference, the BioNeMo framework container has all the dependencies installed. There is no need to install conda or other virtual environment. You can skip the rest of the section. 
 
-## 3. BioNeMo framework and NIM license
+## License
+
+### BioNeMo framework and NIM license
 
 BioNeMo Framework is an open-source software. See [LICENSE](https://github.com/NVIDIA/bionemo-framework/blob/main/LICENSE/license.txt) for license details. 
 
 All NVIDIA NIMs (BioNeMo, LLMs, etc) are free to evaluate. A NVAIE license is required for production usage. See [NVIDIA NIM FAQ](https://forums.developer.nvidia.com/t/nvidia-nim-faq/300317/1) for more details
 
 
-## 4. Preparing for the environment
+### IgFold License
 
-1. Start the container with
-```bash
-bash start-container.sh
-```
+As of Dec 1, 2024, IgFold has the following license restrcitionL 
 
+> The code and pre-trained models from this work are made available for non-commercial use (including at commercial entities) under the terms of the JHU Academic Software License Agreement. For commercial inquiries, please contact Johns Hopkins Tech Ventures at awichma2@jhu.edu.
+
+See [IgFold Github Repository](https://github.com/Graylab/IgFold/tree/main?tab=readme-ov-file) for more information. 
