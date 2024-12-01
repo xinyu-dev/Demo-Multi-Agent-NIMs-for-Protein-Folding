@@ -120,18 +120,20 @@ class Preprocess(BaseTool):
         sequence_metadata = {}
 
         # process monomer
-        if len(sequences) == 1:
-            seq1_metadata = self._process_monomer(sequences[0])
-            sequence_metadata['seq1'] = seq1_metadata
+        # if len(sequences) == 1:
+        #     seq1_metadata = self._process_monomer(sequences[0])
+        #     sequence_metadata['A'] = seq1_metadata
 
-        # process dimer
-        elif len(sequences) == 2:
-            seq1_metadata = self._process_monomer(sequences[0])
-            seq2_metadata = self._process_monomer(sequences[1])
-            sequence_metadata['seq1'] = seq1_metadata
-            sequence_metadata['seq2'] = seq2_metadata
-        else:
-            pass
+        # # process dimer
+        # # elif len(sequences) == 2:
+        # #     seq1_metadata = self._process_monomer(sequences[0])
+        # #     seq2_metadata = self._process_monomer(sequences[1])
+        # #     sequence_metadata['A'] = seq1_metadata
+        # #     sequence_metadata['B'] = seq2_metadata
+
+        for i, seq in enumerate(sequences):
+            seq_metadata = self._process_monomer(seq)
+            sequence_metadata[f'{chr(65+i)}'] = seq_metadata
 
         # return the result
         result = PreprocessOutput(
@@ -148,7 +150,6 @@ class Preprocess(BaseTool):
 class ModelSelectionOutput(BaseModel):
     """Output schema for ModelSelection."""
     selected_models: list[str] = Field(description="List of selected models", default = [])
-
     explanation: str = Field(description="Explanation of why you selected some models, and why other models aren't selected", default = "")
 
 class ESMFoldToolInput(BaseModel):

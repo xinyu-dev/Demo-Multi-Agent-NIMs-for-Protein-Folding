@@ -32,6 +32,7 @@ preprocess_task:
 model_selection_task:
   description: >
     Analyze output from the preprocess_agent, then decides on the best model for structure prediction. 
+    If there are 0 chains, tell the user to inspect the input, and you can end the conversation here. 
     If human makes suggestions, incorporate the human's suggestions if the model is in the list of available models. 
   expected_output: >
     A concise summary of the following: 
