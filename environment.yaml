@@ -4,19 +4,24 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10 # 3.10 is reuqired by openmm 7.7.0. Igfold relxation using openmm cannot run if openfold is at 8.x versions. 
   - abnumber
-  - openmm=7.7.0 # required by igfold if relaxation is used. 
-  - pdbfixer
   - pip
   - pip:
+      - python=3.11
       - crewai
       - crewai-tools
       - python-dotenv
+      - loguru
+      - boltz
       - pandas
       - numpy
       - matplotlib
-      - loguru
-      - igfold
       - biopython
-      - tokenizers<0.21.0 # igfold has this constraint
+
+
+# igfold sepcific constrainst: 
+# conda: - openmm=7.7.0 # required by igfold if relaxation is used. 
+# conda:   - pdbfixer, used by igfold
+# pip:  - python=3.12 # 3.10 is reuqired by openmm 7.7.0. Igfold relxation using openmm cannot run if openfold is at 8.x versions. 
+# pip       - tokenizers<0.21.0 # igfold has this constraint
+# pip       - igfold
