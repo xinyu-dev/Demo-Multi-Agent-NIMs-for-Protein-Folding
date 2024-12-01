@@ -5,9 +5,9 @@ channels:
   - defaults
 dependencies:
   - abnumber
+  - python=3.12
   - pip
   - pip:
-      - python=3.11
       - crewai
       - crewai-tools
       - python-dotenv
@@ -17,11 +17,12 @@ dependencies:
       - numpy
       - matplotlib
       - biopython
+      - py3dmol
 
 
 # igfold sepcific constrainst: 
 # conda: - openmm=7.7.0 # required by igfold if relaxation is used. 
 # conda:   - pdbfixer, used by igfold
-# pip:  - python=3.12 # 3.10 is reuqired by openmm 7.7.0. Igfold relxation using openmm cannot run if openfold is at 8.x versions. 
+# conda:  - python=3.12 # 3.10 is reuqired by openmm 7.7.0. Igfold relxation using openmm cannot run if openfold is at 8.x versions. 
 # pip       - tokenizers<0.21.0 # igfold has this constraint
 # pip       - igfold
