@@ -34,7 +34,7 @@ model_selection_task:
     Analyze output from the preprocess_agent, then decides on the best model for structure prediction. 
     If human makes suggestions, incorporate the human's suggestions if the model is in the list of available models. 
   expected_output: >
-    A concise summary of the following: : 
+    A concise summary of the following: 
     - List of names of selected models. 
     - A concise explanation of why you made the selection and why other models are not selected
   agent: model_selection_agent
@@ -51,14 +51,23 @@ esmfold_task:
     3) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
   agent: esmfold_agent
 
-igfold_task:
+# igfold_task:
+#   description: >
+#     Invoke IgFold tool to predict the structure of the antibody. 
+#   expected_output: >
+#     A concise report of: 
+#     1) Answer to the following question in this format: "Is IgFold selected? Yes|No"
+#     2) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
+#   agent: igfold_agent
+
+boltz_task:
   description: >
-    Invoke IgFold tool to predict the structure of the antibody. 
+    Invoke Boltz tool to predict the structure of the protein. 
   expected_output: >
     A concise report of: 
-    1) Answer to the following question in this format: "Is IgFold selected? Yes|No"
+    1) Answer to the following question in this format: "Is Boltz selected? Yes|No"
     2) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
-  agent: igfold_agent
+  agent: boltz_agent
 
 
 reporter_task:
@@ -68,5 +77,5 @@ reporter_task:
     A concise bullet point summary of the following: 
     1. Start with a title: Final Report: 
     2. Make a bullet point for each of folding models provided in the context
-    3. For each model, make a bullet point for the following: 1) whether model is selected for the protein 2) if selected, whether the prediction is successful, 3) if successful, file path of the saved PDB file of the predicted structure
+    3. For each model, make a bullet point for the following: 1) whether model is selected for the protein 2) if selected, whether the prediction is successful, 3) if successful, file path or folder path of the saved results. 
   agent: reporter_agent

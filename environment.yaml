@@ -18,6 +18,7 @@ dependencies:
       - matplotlib
       - biopython
       - py3dmol
+      - langchain_nvidia_ai_endpoints
 
 
 # igfold sepcific constrainst: 

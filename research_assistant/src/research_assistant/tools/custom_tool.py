@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 import os, shutil, requests
 from loguru import logger
 from abnumber import Chain
-from igfold import IgFoldRunner
+# from igfold import IgFoldRunner
 
 
 
@@ -151,6 +151,12 @@ class ModelSelectionOutput(BaseModel):
 
     explanation: str = Field(description="Explanation of why you selected some models, and why other models aren't selected", default = "")
 
+class ESMFoldToolInput(BaseModel):
+    """Input schema for ESMFoldTool."""
+    selected_models: List[str] = Field(description="List of selected models", default = [])
+    protein_name: str = Field(description="Name of the protein", default = "")
+    sequence: str = Field(description="Clean amino acid sequence of the protein that will be used for prediction", default = None)
+
 
 class ESMFoldPlayground:
     def __init__(self, NGC_API_KEY, query_url=None):
@@ -195,7 +201,7 @@ class ESMFoldPlayground:
         
         # check response
         if response.status_code == 200:
-            logger.success("Request successful")
+            logger.success("ESMFold request successful")
             # get the result
             result = response.json()
             # Write PDB file
@@ -204,7 +210,7 @@ class ESMFoldPlayground:
                 with open(fp, "w") as f:
                     f.write(result["pdbs"][0])
         else:
-            logger.error(f"Request failed with status code {response.status_code}. Output file will not be saved.")
+            logger.error(f"ESMFold Request failed with status code {response.status_code}. Output file will not be saved.")
             logger.error("Response content:", response.content)
             
         return response
@@ -248,21 +254,7 @@ def predict_with_esmfold(sequence, output_dir="output/esmfold_result", output_fi
             'error': str(e), 
             'output_file_path': None
         }
-    
 
-class FoldToolOutput(BaseModel):
-    """Output schema for different protein folding tools."""
-    model_name: str = Field(description="Name of the protein folding tool", default = "")
-    model_is_selected: bool = Field(description="Whether the model is selected by the model_selection_agent", default = False)
-    success: bool = Field(description="Whether the prediction is successful", default = False)
-    output_file_path: str = Field(description="Path to the output PDB file of the predicted structure", default = "")
-
-
-class ESMFoldToolInput(BaseModel):
-    """Input schema for ESMFoldTool."""
-    selected_models: List[str] = Field(description="List of selected models", default = [])
-    protein_name: str = Field(description="Name of the protein", default = "")
-    sequence: str = Field(description="Clean amino acid sequence of the protein that will be used for prediction", default = None)
 
 
 class ESMFoldTool(BaseTool):
@@ -273,8 +265,11 @@ class ESMFoldTool(BaseTool):
 
     def _run(self, selected_models: List[str], protein_name: str, sequence: str) -> str:
 
+        from research_assistant.tools.helpers import get_run_id
         # directory to save the output
-        output_base_dir = "output/esmfold_result"
+        output_base_dir = os.path.join("output/esmfold_result", get_run_id())
+        preprare_directory(output_base_dir, delete_old=True)
+        logger.debug(f"Prepared output directory: {output_base_dir}")
 
         result = FoldToolOutput(
             model_name="ESMFold",
@@ -299,95 +294,129 @@ class ESMFoldTool(BaseTool):
             result.model_is_selected = True
         
         return str(result)
-    
 
-def predict_with_igfold(vh_sequence, vl_sequence, output_dir="output/igfold_result", output_file_name="predicted_antibody.pdb", delete_old_dir=True):
 
+class FoldToolOutput(BaseModel):
+    """Output schema for different protein folding tools."""
+    model_name: str = Field(description="Name of the protein folding tool", default = "")
+    model_is_selected: bool = Field(description="Whether the model is selected by the model_selection_agent", default = False)
+    success: bool = Field(description="Whether the prediction is successful", default = False)
+    output_file_path: str = Field(description="Path to the output results (PDB files or directories)", default = "")
+
+
+class BoltzToolInput(BaseModel):
+    """Input schema for BoltzTool."""
+    selected_models: List[str] = Field(description="List of selected models", default = [])
+    protein_name: str = Field(description="Name of the protein", default = "")
+    sequences: List[str] = Field(description="List of clean amino acid sequences of the protein that will be used for prediction", default = [])
+
+def predict_with_boltz(sequences, yaml_dir = "input/boltz_input", yaml_file_name = "protein1.yaml", result_dir="output/boltz_result/protein1", delete_old_dir=False):
     """
-    Predict the structure of an antibody with IgFold
-    vh_sequence: str, clean amino acid sequence of the VH chain
-    vl_sequence: str, clean amino acid sequence of the VL chain
-    output_dir: str, the directory to save the output to. If there are existing contents, it will be deleted and recreated. Defaults to None, and it will not save the output PDB file. 
-    output_file_name: str, the name of the output PDB file. Defaults to "predicted_antibody.pdb". Only used when output_dir is not None.
-    delete_old_dir: bool, whether to delete the old directory. Defaults to True.
+    Predict the structure of a protein with Boltz model
+    sequences: list[str], list of clean amino acid sequences of the protein that will be used for prediction
+    yaml_dir: str, the directory to save the input YAML file. Defaults to "input/boltz_input".
+    yaml_file_name: str, the name of the input YAML file. Defaults to "protein1.yaml".
+    result_dir: str, the directory to save the output PDB file. Defaults to "output/boltz_result/protein1".
+    delete_old_dir: bool, whether to delete the old directory. Defaults to False.
     return: dict, the result of the prediction
     """
+    from research_assistant.tools.helpers import write_sequences_to_yaml
+    import subprocess
 
-    # example input seuquence for IgFold
-    #     sequences = {
-    # "H": "EVQLVQSGPEVKKPGTSVKVSCKASGFTFMSSAVQWVRQARGQRLEWIGWIVIGSGNTNYAQKFQERVTITRDMSTSTAYMELSSLRSEDTAVYYCAAPYCSSISCNDGFDIWGQGTMVTVS",
-    #"L": "DVVMTQTPFSLPVSLGDQASISCRSSQSLVHSNGNTYLHWYLQKPGQSPKLLIYKVSNRFSGVPDRFSGSGSGTDFTLKISRVEAEDLGVYFCSQSTHVPYTFGGGTKLEIK"
-    #}
+    # prepare input directory
+    preprare_directory(yaml_dir, delete_old=delete_old_dir)
 
-    logger.info(f"Predicting the structure of antibody with IgFold")
-    sequences = {}
-    if vh_sequence is not None and len(vh_sequence) > 1: 
-        sequences['H'] = vh_sequence
-    if vl_sequence is not None and len(vl_sequence) > 1:
-        sequences['L'] = vl_sequence
+    input_yaml_path = os.path.join(yaml_dir, yaml_file_name)
+    logger.info(f"Writing input sequences to YAML at: {input_yaml_path}")
+    write_sequences_to_yaml(
+        sequences=sequences, 
+        output_file=input_yaml_path
+    )
 
-    logger.info(f"Input sequences for IgFold model: {sequences}")
-
-    preprare_directory(output_dir, delete_old=False)
-    fp = os.path.join(output_dir, output_file_name)
+    # Define the CLI command and arguments
+    command = [
+        "boltz", 
+        "predict", 
+        input_yaml_path, 
+        "--out_dir", result_dir, 
+        "--devices", "1", 
+        "--output_format", "pdb", 
+        "--use_msa_server"
+    ]
 
     try:
-        # IgFold will raise error if there is any issue with teh input seqeunce 
-        igfold = IgFoldRunner()
-        igfold.fold(
-            fp, # Output PDB file
-            sequences=sequences, # Antibody sequences
-            do_refine=False, # Refine the antibody structure with PyRosetta
-            do_renum=False, # Renumber predicted antibody structure (Chothia)
-        )
-        logger.success(f"IgFold successfully predicted the structure of antibody and saved to {fp}")
+        logger.info(f"Running Boltz prediction...")
+        # Run the command
+        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        
+        # Print the standard output
+        logger.info("Prediction completed: Command Output:\n", result.stdout)
+        
+        # Print the standard error if there is any
+        if result.stderr:
+            logger.debug("Command Error (stderr.. this is usually not concerning):\n", result.stderr)
+
+        logger.success(f"Boltz successfully predicted the structure of protein and saved to {result_dir}")
+
         return {
             'success': True,
-            'output_file_path': fp, 
-            'error': None
+            'error': None, 
+            'output_file_path': result_dir
         }
-    except Exception as e:
-        logger.error(f"Failed to predict the structure of antibody with IgFold with error: {e}")
+
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Command failed with return code {e.returncode}")
+        logger.error("Error Output:\n", e.stderr)
         return {
             'success': False,
             'error': str(e), 
             'output_file_path': None
         }
+
+class BoltzTool(BaseTool):
+    name: str = "Using Boltz to predict protein structure"
+    description: str = "Use Boltz to predict the structure of a protein"
+    args_schema: Type[BaseModel] = BoltzToolInput
+
+    def _run(self, selected_models: List[str], protein_name: str, sequences: List[str]) -> str:
+
+        # get run ID
+
+        from research_assistant.tools.helpers import get_run_id
+
+        logger.info(f"Getting run ID: {get_run_id()}")
+        run_id = get_run_id()
+
+        output_base_dir = os.path.join("output/boltz_result", run_id)
+        preprare_directory(output_base_dir, delete_old=True)
+        logger.debug(f"Prepared output directory: {output_base_dir}")
         
-class IgFoldToolInput(BaseModel):
-    """
-    Input schema for IgFoldTool
-    """
-    selected_models: List[str] = Field(description="List of selected models", default = [])
-    protein_name: str = Field(description="Name of the protein", default = "")
-    vh_sequence: str = Field(description="Clean amino acid sequence of the VH chain that will be used for prediction", default = None)
-    vl_sequence: str = Field(description="Clean amino acid sequence of the VL chain that will be used for prediction", default = None)
-
-class IgFoldTool(BaseTool):
-    name: str = "Using IgFold to predict antibody structure"
-    description: str = "Use IgFold to predict the structure of an antibody"
-    args_schema: Type[BaseModel] = IgFoldToolInput
-
-    def _run(self, selected_models: List[str], protein_name: str, vh_sequence: str, vl_sequence: str) -> str:
-
-        output_base_dir = "output/igfold_result"
+        yaml_dir = os.path.join("input/boltz_input", run_id)
+        preprare_directory(yaml_dir, delete_old=True)
+        logger.debug(f"Prepared YAML input directory: {yaml_dir}")
 
         result = FoldToolOutput(
-            model_name="IgFold",
+            model_name="Boltz",        
         )
 
-        # check if IgFold is in the selected models
-        if "IgFold" not in selected_models:
+        # check if Boltz, Boltz-1, Boltz-2 in the selected models
+        if "Boltz" not in selected_models:
             result.model_is_selected = False
             result.output_file_path = None
             result.success = False
         else:
             # generate output file name
-            output_file_name= f"{protein_name}.pdb"
+            result_dir = output_base_dir
+            yaml_file_name = f"{protein_name}.yaml"
             
             # predict the structure
-            logger.info(f"Predicting the structure of {protein_name} with IgFold")
-            pred_r = predict_with_igfold(vh_sequence, vl_sequence, output_dir=output_base_dir, output_file_name=output_file_name)
+            logger.info(f"Predicting the structure of {protein_name} with Boltz")
+            pred_r = predict_with_boltz(
+                sequences=sequences, 
+                yaml_dir=yaml_dir,
+                yaml_file_name=yaml_file_name,
+                result_dir=result_dir
+            )
 
             # update the result
             result.success = pred_r['success']
@@ -395,3 +424,101 @@ class IgFoldTool(BaseTool):
             result.model_is_selected = True
 
         return str(result)
+
+
+# class IgFoldToolInput(BaseModel):
+#     """
+#     Input schema for IgFoldTool
+#     """
+#     selected_models: List[str] = Field(description="List of selected models", default = [])
+#     protein_name: str = Field(description="Name of the protein", default = "")
+#     vh_sequence: str = Field(description="Clean amino acid sequence of the VH chain that will be used for prediction", default = None)
+#     vl_sequence: str = Field(description="Clean amino acid sequence of the VL chain that will be used for prediction", default = None)
+
+# def predict_with_igfold(vh_sequence, vl_sequence, output_dir="output/igfold_result", output_file_name="predicted_antibody.pdb", delete_old_dir=True):
+
+#     """
+#     Predict the structure of an antibody with IgFold
+#     vh_sequence: str, clean amino acid sequence of the VH chain
+#     vl_sequence: str, clean amino acid sequence of the VL chain
+#     output_dir: str, the directory to save the output to. If there are existing contents, it will be deleted and recreated. Defaults to None, and it will not save the output PDB file. 
+#     output_file_name: str, the name of the output PDB file. Defaults to "predicted_antibody.pdb". Only used when output_dir is not None.
+#     delete_old_dir: bool, whether to delete the old directory. Defaults to True.
+#     return: dict, the result of the prediction
+#     """
+
+#     # example input seuquence for IgFold
+#     #     sequences = {
+#     # "H": "EVQLVQSGPEVKKPGTSVKVSCKASGFTFMSSAVQWVRQARGQRLEWIGWIVIGSGNTNYAQKFQERVTITRDMSTSTAYMELSSLRSEDTAVYYCAAPYCSSISCNDGFDIWGQGTMVTVS",
+#     #"L": "DVVMTQTPFSLPVSLGDQASISCRSSQSLVHSNGNTYLHWYLQKPGQSPKLLIYKVSNRFSGVPDRFSGSGSGTDFTLKISRVEAEDLGVYFCSQSTHVPYTFGGGTKLEIK"
+#     #}
+
+#     logger.info(f"Predicting the structure of antibody with IgFold")
+#     sequences = {}
+#     if vh_sequence is not None and len(vh_sequence) > 1: 
+#         sequences['H'] = vh_sequence
+#     if vl_sequence is not None and len(vl_sequence) > 1:
+#         sequences['L'] = vl_sequence
+
+#     logger.info(f"Input sequences for IgFold model: {sequences}")
+
+#     preprare_directory(output_dir, delete_old=False)
+#     fp = os.path.join(output_dir, output_file_name)
+
+#     try:
+#         # IgFold will raise error if there is any issue with teh input seqeunce 
+#         igfold = IgFoldRunner()
+#         igfold.fold(
+#             fp, # Output PDB file
+#             sequences=sequences, # Antibody sequences
+#             do_refine=False, # Refine the antibody structure with PyRosetta
+#             do_renum=False, # Renumber predicted antibody structure (Chothia)
+#         )
+#         logger.success(f"IgFold successfully predicted the structure of antibody and saved to {fp}")
+#         return {
+#             'success': True,
+#             'output_file_path': fp, 
+#             'error': None
+#         }
+#     except Exception as e:
+#         logger.error(f"Failed to predict the structure of antibody with IgFold with error: {e}")
+#         return {
+#             'success': False,
+#             'error': str(e), 
+#             'output_file_path': None
+#         }
+        
+
+# class IgFoldTool(BaseTool):
+#     name: str = "Using IgFold to predict antibody structure"
+#     description: str = "Use IgFold to predict the structure of an antibody"
+#     args_schema: Type[BaseModel] = IgFoldToolInput
+
+#     def _run(self, selected_models: List[str], protein_name: str, vh_sequence: str, vl_sequence: str) -> str:
+
+#         output_base_dir = "output/igfold_result"
+
+#         result = FoldToolOutput(
+#             model_name="IgFold",
+#         )
+
+#         # check if IgFold is in the selected models
+#         if "IgFold" not in selected_models:
+#             result.model_is_selected = False
+#             result.output_file_path = None
+#             result.success = False
+#         else:
+#             # generate output file name
+#             output_file_name= f"{protein_name}.pdb"
+            
+#             # predict the structure
+#             logger.info(f"Predicting the structure of {protein_name} with IgFold")
+#             pred_r = predict_with_igfold(vh_sequence, vl_sequence, output_dir=output_base_dir, output_file_name=output_file_name)
+
+#             # update the result
+#             result.success = pred_r['success']
+#             result.output_file_path = pred_r['output_file_path']
+#             result.model_is_selected = True
+
+#         return str(result)
+

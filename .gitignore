@@ -1,6 +1,8 @@
 .DS_Store
 notebooks/output/*
 .env
+research_assistant/input/*
+research_assistant/output/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

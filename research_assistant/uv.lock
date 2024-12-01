@@ -3470,14 +3470,10 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "crewai", extra = ["tools"] },
-    { name = "tokenizers" },
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "crewai", extras = ["tools"], specifier = ">=0.83.0,<1.0.0" },
-    { name = "tokenizers", specifier = "<0.21.0" },
-]
+requires-dist = [{ name = "crewai", extras = ["tools"], specifier = ">=0.83.0,<1.0.0" }]
 
 [[package]]
 name = "rich"

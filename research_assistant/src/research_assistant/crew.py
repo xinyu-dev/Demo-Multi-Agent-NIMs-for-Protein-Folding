@@ -5,7 +5,7 @@ from crewai.tasks.task_output import TaskOutput
 
 
 # Uncomment the following line to use an example of a custom tool
-from research_assistant.tools.custom_tool import Preprocess, PreprocessOutput, ModelSelectionOutput, ESMFoldTool, IgFoldTool
+from research_assistant.tools.custom_tool import Preprocess, PreprocessOutput, ModelSelectionOutput, ESMFoldTool, BoltzTool
 import os
 
 # Check our tools documentations for more information on how to use them
@@ -76,28 +76,44 @@ class ResearchAssistant():
 			context=[self.preprocess_task(), self.model_selection_task()], 
 			agent=self.esmfold_agent(), 
 		)
-	
+
 	@agent
-	def igfold_agent(self) -> Agent:
+	def boltz_agent(self) -> Agent:
 		return Agent(
-			config=self.agents_config['igfold_agent'],
+			config=self.agents_config['boltz_agent'],
 			verbose=True,
-			tools=[IgFoldTool()]
+			tools=[BoltzTool()]
 		)
 
 	@task
-	def igfold_task(self) -> Task:
+	def boltz_task(self) -> Task:
 		return Task(
-			config=self.tasks_config['igfold_task'],
+			config=self.tasks_config['boltz_task'],
 			context=[self.preprocess_task(), self.model_selection_task()], 
-			agent=self.igfold_agent(), 
+			agent=self.boltz_agent(), 
 		)
+	
+	# @agent
+	# def igfold_agent(self) -> Agent:
+	# 	return Agent(
+	# 		config=self.agents_config['igfold_agent'],
+	# 		verbose=True,
+	# 		tools=[IgFoldTool()]
+	# 	)
+
+	# @task
+	# def igfold_task(self) -> Task:
+	# 	return Task(
+	# 		config=self.tasks_config['igfold_task'],
+	# 		context=[self.preprocess_task(), self.model_selection_task()], 
+	# 		agent=self.igfold_agent(), 
+	# 	)
 
 	@agent
 	def reporter_agent(self) -> Agent:
 		return Agent(
 			config=self.agents_config['reporter_agent'],
-			context=[self.esmfold_task(), self.igfold_task()], # add more folding tasks here 
+			context=[self.esmfold_task(), self.boltz_task()], # add more folding tasks here 
 			verbose=True,
 		)
 	
@@ -105,7 +121,7 @@ class ResearchAssistant():
 	def reporter_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['reporter_task'],
-			context=[self.esmfold_task(), self.igfold_task()], # add more folding tasks here 
+			context=[self.esmfold_task(), self.boltz_task()], # add more folding tasks here 
 		)
 
 	@crew
