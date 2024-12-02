@@ -30,10 +30,10 @@ Similar step as above, but choose **Generate Personal Key** instead
 
 ## 2. Setting up environment for Lab 1.x
 
-> For notebooks Lab 1.x, we will be using NIMs hosted by NVIDIA, with some locally installed models & packages. You can run it on your laptop (MacOs and Linux tested) even without GPU support. 
+> For notebooks Lab 1.x, we will be using NIMs hosted by NVIDIA, with some locally installed models & packages. Linux environment with GPU is strongly recommended because 1) `abnumber` installation on Apple Silicon MacOS is a bit complicated and 2) Boltz benefits from GPU acceleration.  
 
 1. In SageMaker Studio, create a new Jupyterlab space. The following configuration 
-    ![sagemaker-studio-1](../images/sagemaker-studio-1.png)
+   ![sagemaker-studio-1](../images/sagemaker-studio-1.png)
 2. Once you're inside the JupyterLab, clone the repository and cd into the directory
     ```bash
     git clone https://github.com/xinyu-dev/2025-01-biologic-summit-workshop.git
