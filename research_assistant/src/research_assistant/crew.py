@@ -36,7 +36,6 @@ class ResearchAssistant():
 			config=self.agents_config['preprocess_agent'],
 			verbose=True, 
 			tools=[Preprocess(result_as_answer=True)],
-			allow_delegation=False
 		)
 	
 	@task
@@ -50,7 +49,6 @@ class ResearchAssistant():
 		return Agent(
 			config=self.agents_config['model_selection_agent'],
 			verbose=True,
-			allow_delegation=False
 		)
 	
 	@task
@@ -75,6 +73,7 @@ class ResearchAssistant():
 			config=self.tasks_config['esmfold_task'],
 			context=[self.preprocess_task(), self.model_selection_task()], 
 			agent=self.esmfold_agent(), 
+			async_execution=True
 		)
 
 	@agent
@@ -90,7 +89,8 @@ class ResearchAssistant():
 		return Task(
 			config=self.tasks_config['boltz_task'],
 			context=[self.preprocess_task(), self.model_selection_task()], 
-			agent=self.boltz_agent(), 
+			agent=self.boltz_agent(),
+			async_execution=True
 		)
 	
 	# @agent
