@@ -30,7 +30,7 @@ Similar step as above, but choose **Generate Personal Key** instead
 
 ## 2. Setting up environment for Lab 1.x
 
-> For notebooks Lab 1.x, we will be using NIMs hosted by NVIDIA, with some locally installed models & packages. Linux environment with GPU is strongly recommended because 1) `abnumber` installation on Apple Silicon MacOS is a bit complicated and 2) Boltz benefits from GPU acceleration.  
+> For notebooks Lab 1.x, we will be using NIMs hosted by NVIDIA, with some locally installed models & packages. You will need a Linux environment with GPU support. 
 
 1. In SageMaker Studio, create a new Jupyterlab space. The following configuration 
    ![sagemaker-studio-1](../images/sagemaker-studio-1.png)
@@ -50,28 +50,11 @@ Similar step as above, but choose **Generate Personal Key** instead
     ```bash
     conda init
     ```
-    Close the terminal, Then open a new one, and type
-
+6. Close the terminal, Then open a new one, and type
     ```bash
     conda activate workshop
     ```
 
-## Setting up environment for Lab 2.x
-
-Lab 2.x will utilize the BioNeMo Framework container for ESM2 training, finetuning, and inference, which has all the dependencies installed. Follow the steps below to set up the environment. 
-
-1. Launch the BioNeMo Framework container. We provide example guides on: 
-    - [AWS EC2](https://xinyu-nvidia.gitbook.io/bionemo-gitbook/framework-setup/platform/ec2)
-    - [AWS SageMaker Studio](https://xinyu-nvidia.gitbook.io/bionemo-gitbook/framework-setup/platform/sagemaker-studio)
-2. Once your inside the BioNeMo Framework container, cd into the `/workspace/bionemo` directory 
-    ```bash
-    cd /workspace/bionemo
-    ```
-3. git clone this repository
-    ```bash
-    git clone https://github.com/xinyu-dev/2025-01-biologic-summit-workshop.git
-   ```
-4. If we are doing model pretraining/finetuning/inference, the BioNeMo framework container has all the dependencies installed. There is no need to install conda or other virtual environment. You can skip the rest of the section. 
 
 ## License
 
@@ -82,10 +65,6 @@ BioNeMo Framework is an open-source software. See [LICENSE](https://github.com/N
 All NVIDIA NIMs (BioNeMo, LLMs, etc) are free to evaluate. A NVAIE license is required for production usage. See [NVIDIA NIM FAQ](https://forums.developer.nvidia.com/t/nvidia-nim-faq/300317/1) for more details
 
 
-### IgFold License
+### Boltz-1 License
 
-As of Dec 1, 2024, IgFold has the following license restrcitionL 
-
-> The code and pre-trained models from this work are made available for non-commercial use (including at commercial entities) under the terms of the JHU Academic Software License Agreement. For commercial inquiries, please contact Johns Hopkins Tech Ventures at awichma2@jhu.edu.
-
-See [IgFold Github Repository](https://github.com/Graylab/IgFold/tree/main?tab=readme-ov-file) for more information. 
+See [Boltz-1 Github Repository](https://github.com/jwohlwend/boltz/blob/main/LICENSE) for license details. 
