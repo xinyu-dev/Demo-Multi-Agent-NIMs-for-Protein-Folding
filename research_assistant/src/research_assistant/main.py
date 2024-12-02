@@ -6,11 +6,10 @@ from research_assistant.crew import ResearchAssistant
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
-# This main file is intended to be a way for you to run your
-# crew locally, so refrain from adding unnecessary logic into this file.
-# Replace with inputs you want to test with, it will automatically
-# interpolate any tasks and agents information
 
+
+# Example Input 1: 2 chains of an antibody. 
+# We expec them crew to process them into VH/VL truncating the Fc regions, and select Boltz-1 as the only model
 example_input1 =  """ Predict the structure of the following antibody:
 > Adalimumab Light chain:
 DIQMTQSPSSLSASVGDRVTITCRASQGIRNYLAWYQQKPGKAPKLLIYAASTLQSGVPS
@@ -28,10 +27,14 @@ ELTKNQVSLTCLVKGFYPSDIAVEWESNGQPENNYKTTPPVLDSDGSFFLYSKLTVDKSR
 WQQGNVFSCSVMHEALHNHYTQKSLSLSPGK      
         """
 
+# Input 2: a single chain of a VHH-Fc antibody. 
+# We expect the crew to process it into a VHH (truncating the Fc region), then select Boltz-1 and/or ESMFold 
 example_input2 = """ 
 Predict the structure of this VHH-Fc: QVQLQESGGGLVQAGGSLRLSCAASGTISPLPAMGWYRQAPGKEREFVAGIDTGAITNYADSVKGRFTISRDNAKNTVYLQMNSLKPEDTAVYYCAVFPAAYDYYERYYTYWGQGTQVTVSSASTKGPSVFPLAPSSKSTSGGTAALGCLVKDYFPEPVTVSWNSGALTSGVHTFPAVLQSSGLYSLSSVVTVPSSSLGTQTYICNVNHKPSNTKVDKKVEPKSCDKTHTCPPCPAPELLGGPSVFLFPPKPKDTLMISRTPEVTCVVVDVSHEDPEVKFNWYVDGVEVHNAKTKPREEQYNSTYRVVSVLTVLHQDWLNGKEYKCKVSNKALPAPIEKTISKAKGQPREPQVYTLPPSRDELTKNQVSLTCLVKGFYPSDIAVEWESNGQPENNYKTTPPVLDSDGSFFLYSKLTVDKSRWQQGNVFSCSVMHEALHNHYTQKSLSLSPGK
  """
 
+# Example Input 3: a single chain of a protein. 
+# We expect the crew to retain the full sequence, and select Boltz-1 and/or ESMFold 
 example_input3 = """
 MKWVTFISLLLLFSSAYSRGVFRRDTHKSEIAHRFKDLGEEHFKGLVLIAFSQYLQQCPFDEHVKLVNELTEFAKTCVADESHAGCEKSLHTLFGDELCKVASLRETYGDMADCCEKQEPERNECFLSHKDDSPDLPKLKPDPNTLCDEFKADEKKFWGKYLYEIARRHPYFYAPELLYYANKYNGVFQECCQAEDKGACLLPKIETMREKVLASSARQRLRCASIQKFGERALKAWSVARLSQKFPKAEFVEVTKLVTDLTKVHKECCHGDLLECADDRADLAKYICDNQDTISSKLKECCDKPLLEKSHCIAEVEKDAIPENLPPLTADFAEDKDVCKNYQEAKDAFLGSFLYEYSRRHPEYAVSVLLRLAKEYEATLEECCAKDDPHACYSTVFDKLKHLVDEPQNLIKQNCDQFEKLGEYGFQNALIVRYTRKVPQVSTPTLVEVSRSLGKVGTRCCTKPESERMPCTEDYLSLILNRLCVLHEKTPVSEKVTKCCTESLVNRRPCFSALTPDETYVPKAFDEKLFTFHADICTLPDTEKQIKKQTALVELLKHKPKATEEQLKTVMENFVAFVDKCCAADDKEACFAVEGPKLVVSTQTALA
 Fold the sequence of the BSA protein above. 
@@ -43,7 +46,7 @@ def run():
     Run the crew.
     """
     inputs = {
-        'inputs': example_input2
+        'inputs': example_input1
     }
     crew = ResearchAssistant().crew()
     crew.kickoff(inputs=inputs)
@@ -68,7 +71,7 @@ def train():
     Train the crew for a given number of iterations.
     """
     inputs = {
-            'inputs': example_input3
+            'inputs': example_input1
     }
     try:
         ResearchAssistant().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)

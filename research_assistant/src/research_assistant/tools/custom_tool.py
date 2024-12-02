@@ -80,7 +80,7 @@ class PreprocessOutput(BaseModel):
     """Output schema for Preprocess."""
     protein_name: str = Field(description="Name of the sequence", default = "protein_1")
     num_chains: int = Field(description="Number of chains in the protein", default = 0)
-    sequence_metadata: Dict[str, SequenceMetadata] = Field(description="Metadata of each sequence in the protein", default=0)
+    sequence_metadata: Dict[str, SequenceMetadata] = Field(description="SequenceMetadata of each sequence in the protein. Dict key is the chain ID, and value is the SquenceMetadat object, which includes clean_sequence, description, is_mab, vh_or_vl, and is_valid_sequence, etc", default={})
 
 
 class Preprocess(BaseTool):
@@ -133,7 +133,7 @@ class Preprocess(BaseTool):
 
         for i, seq in enumerate(sequences):
             seq_metadata = self._process_monomer(seq)
-            sequence_metadata[f'{chr(65+i)}'] = seq_metadata
+            sequence_metadata[f'chain {chr(65+i)}'] = seq_metadata
 
         # return the result
         result = PreprocessOutput(
@@ -156,7 +156,7 @@ class ESMFoldToolInput(BaseModel):
     """Input schema for ESMFoldTool."""
     selected_models: List[str] = Field(description="List of selected models", default = [])
     protein_name: str = Field(description="Name of the protein", default = "")
-    sequence: str = Field(description="Clean amino acid sequence of the protein that will be used for prediction", default = None)
+    sequence: str = Field(description="Clean amino acid sequence of the protein", default = None)
 
 
 class ESMFoldPlayground:
@@ -309,7 +309,7 @@ class BoltzToolInput(BaseModel):
     """Input schema for BoltzTool."""
     selected_models: List[str] = Field(description="List of selected models", default = [])
     protein_name: str = Field(description="Name of the protein", default = "")
-    sequences: List[str] = Field(description="List of clean amino acid sequences of the protein that will be used for prediction", default = [])
+    sequences: List[str] = Field(description="List of all clean amino acid sequences in this protein", default = [])
 
 def predict_with_boltz(sequences, yaml_dir = "input/boltz_input", yaml_file_name = "protein1.yaml", result_dir="output/boltz_result/protein1", delete_old_dir=False):
     """
@@ -346,17 +346,9 @@ def predict_with_boltz(sequences, yaml_dir = "input/boltz_input", yaml_file_name
     ]
 
     try:
-        logger.info(f"Running Boltz prediction...")
+        logger.info(f"Running Boltz prediction with command: {' '.join(command)}")
         # Run the command
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
-        
-        # Print the standard output
-        logger.info("Prediction completed: Command Output:\n", result.stdout)
-        
-        # Print the standard error if there is any
-        if result.stderr:
-            logger.debug("Command Error (stderr.. this is usually not concerning):\n", result.stderr)
-
+        subprocess.run(command)
         logger.success(f"Boltz successfully predicted the structure of protein and saved to {result_dir}")
 
         return {

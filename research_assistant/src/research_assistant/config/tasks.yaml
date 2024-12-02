@@ -42,9 +42,10 @@ model_selection_task:
 
 esmfold_task:
   description: >
-    1. If ESMfold is not among the selected_models, report back to human that ESMFold is not selected. No need to invoke the ESMFold tool. 
-    2. If ESMFold is among selected_models, first retrieve the protein sequence in the context provided by the preproces_task, then invoke ESMFold tool to predict the structure of the protein.
-    4. If ESMFold tool is called, report back to human the file path of the saved PDB file of the predicted structure. 
+    1. If ESMfold is not among the selected_models, do nothing. No need to invoke the ESMFold tool. 
+    2. If ESMFold is among selected_models, first retrieve the clean protein sequence in the context. Pay close attention to ESMFoldToolInput schema. 
+    3. Then invoke ESMFold tool to predict the structure of the protein.
+    4. If ESMFold tool is called, based on the tool result, report back to human the file path of the saved PDB file of the predicted structure. 
   expected_output: >
     A concise report of: 
     1) Answer to the following question in this format: "Is ESMFold selected? Yes|No"
@@ -64,6 +65,10 @@ esmfold_task:
 boltz_task:
   description: >
     Invoke Boltz tool to predict the structure of the protein. 
+    1. If Boltz is not among selected_models, do nothing. No need to invoke the Boltz tool. 
+    2. If Boltz is among selected_models, first retrieve the clean protein sequence in the context. Pay close attention to BoltzToolInput schema. 
+    3. then invoke Boltz tool to predict the structure of the protein.
+    4. If Boltz tool is called, based on the tool result, report back to human the file path of the saved PDB file of the predicted structure. 
   expected_output: >
     A concise report of: 
     1) Answer to the following question in this format: "Is Boltz selected? Yes|No"
