@@ -18,34 +18,34 @@ def is_amino_acid_sequence(seq):
     # Check if all characters in the sequence are valid amino acids
     return all(char in valid_amino_acids for char in seq)
 
-def process_mab_sequence(seq):
-    result = {
-        'seq': None,
-        'description': "Not a valid antibody sequence",
-        'is_vh': False,
-        'is_vl': False
-    }
-    try:
-        # this line can generate an error if the sequence is not a valid antibody sequence
-        chain = Chain(seq, scheme='kabat')
+# def process_mab_sequence(seq):
+#     result = {
+#         'seq': None,
+#         'description': "Not a valid antibody sequence",
+#         'is_vh': False,
+#         'is_vl': False
+#     }
+#     try:
+#         # this line can generate an error if the sequence is not a valid antibody sequence
+#         chain = Chain(seq, scheme='kabat')
 
-        # antibody content is detected. process the sequence based on the type of chain
-        if chain.is_heavy_chain():
-            result['seq'] = chain.seq
-            result['description'] = 'Heavy chain detected. Processed into a VH chain'
-            result['is_vh'] = True
-        elif chain.is_light_chain():
-            result['seq'] = chain.seq
-            result['description'] = 'Light chain detected. Processed into a VL chain'
-            result['is_vl'] = True
-        else:
-            # return the default result
-            pass
-    except:
-        # return the default result
-        pass
+#         # antibody content is detected. process the sequence based on the type of chain
+#         if chain.is_heavy_chain():
+#             result['seq'] = chain.seq
+#             result['description'] = 'Heavy chain detected. Processed into a VH chain'
+#             result['is_vh'] = True
+#         elif chain.is_light_chain():
+#             result['seq'] = chain.seq
+#             result['description'] = 'Light chain detected. Processed into a VL chain'
+#             result['is_vl'] = True
+#         else:
+#             # return the default result
+#             pass
+#     except:
+#         # return the default result
+#         pass
 
-    return result
+#     return result
 
 
 def preprare_directory(temp, delete_old=True):
@@ -69,18 +69,20 @@ class PreprocessInput(BaseModel):
     num_chains: int = Field(default = 0, description="Number of chains in the protein")
     sequences: List[str] = Field(description="List of input sequences from the user", default = [])
 
-class SequenceMetadata(BaseModel):
-    clean_sequence: str = Field(description="Cleaned sequence", default = "")
-    description: str = Field(description="Description of the sequence", default = "")
-    is_mab: bool = Field(description="Whether the sequence is an antibody", default = False)
-    vh_or_vl: str = Field(description="VH or VL chain", default = "")
-    is_valid_sequence: bool = Field(description="Whether the sequence is a valid amino acid sequence", default = False)
+# class SequenceMetadata(BaseModel):
+#     clean_sequence: str = Field(description="Cleaned sequence", default = "")
+#     description: str = Field(description="Description of the sequence", default = "")
+#     is_mab: bool = Field(description="Whether the sequence is an antibody", default = False)
+#     vh_or_vl: str = Field(description="VH or VL chain", default = "")
+#     is_valid_sequence: bool = Field(description="Whether the sequence is a valid amino acid sequence", default = False)
 
 class PreprocessOutput(BaseModel):
     """Output schema for Preprocess."""
     protein_name: str = Field(description="Name of the sequence", default = "protein_1")
     num_chains: int = Field(description="Number of chains in the protein", default = 0)
-    sequence_metadata: Dict[str, SequenceMetadata] = Field(description="SequenceMetadata of each sequence in the protein. Dict key is the chain ID, and value is the SquenceMetadat object, which includes clean_sequence, description, is_mab, vh_or_vl, and is_valid_sequence, etc", default={})
+    clean_sequences: List[str] = Field(description="List of cleaned sequences", default = [])
+
+# sequence_metadata: Dict[str, SequenceMetadata] = Field(description="SequenceMetadata of each sequence in the protein. Dict key is the chain ID, and value is the SquenceMetadat object, which includes clean_sequence, description, is_mab, vh_or_vl, and is_valid_sequence, etc", default={})
 
 
 class Preprocess(BaseTool):
@@ -92,32 +94,33 @@ class Preprocess(BaseTool):
     )
     args_schema: Type[BaseModel] = PreprocessInput
 
-    def _process_monomer(self, sequence: str) -> SequenceMetadata:
+    def _process_monomer(self, sequence: str):
+        return is_amino_acid_sequence(sequence)
 
-        metadata = SequenceMetadata()
+        #metadata = SequenceMetadata()
 
         # check if the sequence is a valid amino acid sequence
-        if is_amino_acid_sequence(sequence):
-            # try to read a 
-            metadata.clean_sequence = sequence
-            metadata.is_valid_sequence = True
+        # if is_amino_acid_sequence(sequence):
+        #     # try to read a 
+        #     metadata.clean_sequence = sequence
+        #     metadata.is_valid_sequence = True
 
-            # check mab content
-            mab_result = process_mab_sequence(sequence)
-            # if the sequence is an antibody, update the result
-            if mab_result['seq'] is not None:
-                metadata.clean_sequence = mab_result['seq']
-                metadata.description = mab_result['description']
-                metadata.is_mab = True
-                metadata.vh_or_vl = 'VH' if mab_result['is_vh'] else 'VL' # Abnumber can only do VH or VL, not both
-            else:
-                metadata.description = "The sequence appears to be a valid protein sequence, but not a valid antibody sequence"
+        #     # check mab content
+        #     mab_result = process_mab_sequence(sequence)
+        #     # if the sequence is an antibody, update the result
+        #     if mab_result['seq'] is not None:
+        #         metadata.clean_sequence = mab_result['seq']
+        #         metadata.description = mab_result['description']
+        #         metadata.is_mab = True
+        #         metadata.vh_or_vl = 'VH' if mab_result['is_vh'] else 'VL' # Abnumber can only do VH or VL, not both
+        #     else:
+        #         metadata.description = "The sequence appears to be a valid protein sequence, but not a valid antibody sequence"
         
-        return metadata
+        # return metadata
 
     def _run(self, protein_name: str, num_chains: int, sequences: List[str]) -> str:
 
-        sequence_metadata = {}
+        # sequence_metadata = {}
 
         # process monomer
         # if len(sequences) == 1:
@@ -131,15 +134,22 @@ class Preprocess(BaseTool):
         # #     sequence_metadata['A'] = seq1_metadata
         # #     sequence_metadata['B'] = seq2_metadata
 
+        clean_sequences = []
         for i, seq in enumerate(sequences):
-            seq_metadata = self._process_monomer(seq)
-            sequence_metadata[f'chain {chr(65+i)}'] = seq_metadata
+            is_protein_sequence = self._process_monomer(seq)
+            if is_protein_sequence:
+                clean_sequences.append(seq)
+            else:
+                pass
+            # seq_metadata = self._process_monomer(seq)
+            # sequence_metadata[f'chain {chr(65+i)}'] = seq_metadata
 
         # return the result
         result = PreprocessOutput(
             protein_name=protein_name,
             num_chains=num_chains,
-            sequence_metadata=sequence_metadata
+            clean_sequences=clean_sequences
+            # sequence_metadata=sequence_metadata
         )
 
         # must return string representation of the pydantic object, 
@@ -345,26 +355,30 @@ def predict_with_boltz(sequences, yaml_dir = "input/boltz_input", yaml_file_name
         "--use_msa_server"
     ]
 
+    result = {
+        'success': False,
+        'error': None,
+        'output_file_path': None
+    }
+
     try:
         logger.info(f"Running Boltz prediction with command: {' '.join(command)}")
-        # Run the command
-        subprocess.run(command)
-        logger.success(f"Boltz successfully predicted the structure of protein and saved to {result_dir}")
-
-        return {
-            'success': True,
-            'error': None, 
-            'output_file_path': result_dir
-        }
-
+        # Run the command, capture the output
+        output = subprocess.run(command, capture_output=True, text=True)
+        print(output.stdout)
+        if "Number of failed examples: 0" in output.stdout:
+            logger.success(f"Boltz successfully predicted the structure of protein and saved to {result_dir}")
+            result['success'] = True
+            result['output_file_path'] = result_dir
+        else:
+            result['error'] = output.stdout
     except subprocess.CalledProcessError as e:
         logger.error(f"Command failed with return code {e.returncode}")
         logger.error("Error Output:\n", e.stderr)
-        return {
-            'success': False,
-            'error': str(e), 
-            'output_file_path': None
-        }
+        result['error'] = str(e)
+
+    return result
+
 
 class BoltzTool(BaseTool):
     name: str = "Using Boltz to predict protein structure"

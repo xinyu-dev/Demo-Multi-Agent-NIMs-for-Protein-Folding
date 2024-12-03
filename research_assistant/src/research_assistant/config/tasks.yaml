@@ -20,12 +20,12 @@ preprocess_task:
     num_chains: 2
     sequences: ["MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS", "MVLSPADKTNVKAAWGK"]
     2. Then pass the formatted input to the Preprocess tool. 
-    3. Report the results
+    3. Report the results.
   expected_output: >
     A concise summary of bullet points:   
     1) Name of the protein
     2) How many chains the protein has
-    3) For each chain: output the 1) clean sequence of each chain, after tool processing, 2) whether it is a valid protein sequence, 3) whether it is an antibody sequence, 4) whether it has a valid VH and/or VL
+    3) For each chain: output the 1) clean sequence of each chain, after tool processing, 2) whether it is a valid protein sequence
     4) In the notes, briefly summarize how you processed the input. 
   agent: preprocess_agent
 
