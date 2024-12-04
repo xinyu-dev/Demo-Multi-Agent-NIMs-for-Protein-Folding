@@ -36,7 +36,7 @@ def run():
     Run the crew.
     """
     inputs = {
-        'message': example_input1
+        'message': example_input2
     }
     crew = ResearchAssistant().crew()
     crew.kickoff(inputs=inputs)

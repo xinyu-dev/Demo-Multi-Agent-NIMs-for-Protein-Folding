@@ -64,7 +64,7 @@ class ResearchAssistant():
 		return Agent(
 			config=self.agents_config['esmfold_agent'],
 			verbose=True,
-			tools=[ESMFoldTool()]
+			tools=[ESMFoldTool(result_as_answer=True)]
 		)
 
 	@task
@@ -81,7 +81,7 @@ class ResearchAssistant():
 		return Agent(
 			config=self.agents_config['boltz_agent'],
 			verbose=True,
-			tools=[BoltzTool()]
+			tools=[BoltzTool(result_as_answer=True)]
 		)
 
 	@task

@@ -53,12 +53,15 @@ preprocess_task:
     3. Report the results.
     Now you can start. Here is the actual input from the user: {message}
   expected_output: >
-    A concise summary of bullet points:   
-    1) Name of the protein
-    2) How many chains the protein has
-    3) For each chain: output the 1) clean sequence of each chain, after tool processing, 2) whether it is a valid protein sequence
-    4) In the notes, briefly summarize how you processed the input. 
+    Output from the Preprocess tool. 
   agent: preprocess_agent
+
+
+#   A concise summary of bullet points:   
+# 1) Name of the protein
+# 2) How many chains the protein has
+# 3) For each chain: output the 1) clean sequence of each chain, after tool processing, 2) whether it is a valid protein sequence
+# 4) In the notes, briefly summarize how you processed the input. 
 
 model_selection_task:
   description: >
@@ -78,11 +81,14 @@ esmfold_task:
     3. Then invoke ESMFold tool to predict the structure of the protein.
     4. If ESMFold tool is called, based on the tool result, report back to human the file path of the saved PDB file of the predicted structure. 
   expected_output: >
-    A concise report of: 
-    1) Answer to the following question in this format: "Is ESMFold selected? Yes|No"
-    2) If ESMFold is selected, answer the following question in this format: "Is the prediction successful? Yes|No"
-    3) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
+    Output from the ESMFold tool. 
   agent: esmfold_agent
+
+
+# A concise report of: 
+# 1) Answer to the following question in this format: "Is ESMFold selected? Yes|No"
+# 2) If ESMFold is selected, answer the following question in this format: "Is the prediction successful? Yes|No"
+# 3) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
 
 # igfold_task:
 #   description: >
@@ -101,11 +107,13 @@ boltz_task:
     3. then use Boltz tool to predict the structure of the protein.
     4. If Boltz tool is called, based on the tool result, report back to human the file path of the saved PDB file of the predicted structure. 
   expected_output: >
-    A concise report of: 
-    1) Answer to the following question in this format: "Is Boltz selected? Yes|No"
-    2) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
+    Output from the Boltz tool. 
   agent: boltz_agent
 
+# A concise report of: 
+# 1) Answer to the following question in this format: "Is Boltz selected? Yes|No"
+# 2) If Boltz is selected, answer the following question in this format: "Is the prediction successful? Yes|No"
+# 3) If the prediction is successful, answer the following question in this format: "File path of the saved PDB file of the predicted structure: <file_path>"
 
 reporter_task:
   description: >

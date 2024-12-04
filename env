@@ -5,6 +5,6 @@ NVIDIA_NIM_API_KEY="YOUR NGC PLAYGROUND API KEY HERE"
 MODEL="nvidia_nim/meta/llama-3.1-405b-instruct"
 
 # optional openai api key, if you want to use it instead of the LLM NIM
-# in that case you want to comment out the MODEL and uncomment the following two lines
+# in that case you want to comment out the MODEL above and uncomment the following two lines
 # MODEL="gpt-4o-mini"
 # OPENAI_API_KEY="YOUR OPENAI API KEY HERE"
