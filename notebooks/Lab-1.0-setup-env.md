@@ -28,12 +28,23 @@
 Similar step as above, but choose **Generate Personal Key** instead
 ![ngc-apikey-3](../images/ngc-apikey-3.jpg)
 
+
+### 1.3 Alternative method to generate NGC API key to use hosted API endpoints in the playground
+
+This method is similar to 1.2, but instead generates the API key directly in the playground. First, find any NIM at build.nvidia.com. Then click on **Get API Key**
+
+![ngc-apikey-4](../images/ngc-apikey-4.jpg)
+
+
 ## 2. Setting up environment for Lab 1.x
+
+### 2.1 Conda environment
 
 > For notebooks Lab 1.x, we will be using NIMs hosted by NVIDIA, with some locally installed models & packages. You will need a Linux environment with GPU support. 
 
 1. In SageMaker Studio, create a new Jupyterlab space. The following configuration 
-   ![sagemaker-studio-1](../images/sagemaker-studio-1.png)
+   A `g6e.8xlarge` instance with 100 GB EBS volume is recommended. 
+
 2. Once you're inside the JupyterLab, clone the repository and cd into the directory
     ```bash
     git clone https://github.com/xinyu-dev/2025-01-biologic-summit-workshop.git
@@ -55,16 +66,8 @@ Similar step as above, but choose **Generate Personal Key** instead
     conda activate workshop
     ```
 
-
-## License
-
-### BioNeMo framework and NIM license
-
-BioNeMo Framework is an open-source software. See [LICENSE](https://github.com/NVIDIA/bionemo-framework/blob/main/LICENSE/license.txt) for license details. 
-
-All NVIDIA NIMs (BioNeMo, LLMs, etc) are free to evaluate. A NVAIE license is required for production usage. See [NVIDIA NIM FAQ](https://forums.developer.nvidia.com/t/nvidia-nim-faq/300317/1) for more details
+### 2.2 API keys
+1. Under the `2025-01-biologic-summit-workshop` directory, you should see a file called `env`. Open it and update it with your NGC playground API key. 
+2. Rename this file to `.env` so that it can be loaded correctly. 
 
 
-### Boltz-1 License
-
-See [Boltz-1 Github Repository](https://github.com/jwohlwend/boltz/blob/main/LICENSE) for license details. 

@@ -15,7 +15,7 @@ model_selection_agent:
     Your initial proposal should be strictly based on the results output from the preprocess_agent. 
     Available choices are:
     - ESMFold: Good for single-chain protein only. Cannot be used on proteins with more than 1 chain. 
-    - Boltz: Good for with single or multiple chains. Should be prioritized over ESMFold if user wants higher accuracy. 
+    - Boltz: Good for with single or multiple chains.  
     - No suitable model found: the sequence is not valid protein, or does not fit in the above criteria. 
     After you have the initial proposal: 
     1. Check with human for feedback
@@ -59,4 +59,4 @@ reporter_agent:
   goal: >
     Collect outputs from different protein folding agents, summarize the results and report back to the user
   backstory: >
-    You are a research assistant that report the final results to user. 
+    You are summarize the context you received and report back to user. 

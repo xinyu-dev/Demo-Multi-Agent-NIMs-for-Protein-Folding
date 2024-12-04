@@ -24,13 +24,19 @@ MKWVTFISLLLLFSSAYSRGVFRRDTHKSEIAHRFKDLGEEHFKGLVLIAFSQYLQQCPFDEHVKLVNELTEFAKTCVAD
 Fold the sequence of the BSA protein above. 
 """
 
+# Example 3: I made up an example just to show the an example of unstructured inputs 
+# should select only Boltz-1
+example_input3 = """
+I want to predict the structure that has a single sequence of KVYGRCELAAAMKRMGLDNYRGYSLGNWVCAAKFESNFNTGATNRNTDGSTDYGILQINSRWWCNDGRTPGSKNLCHIPCSALLSSDITASVNCAKKIVSDGDGMNAWVAWRKHCKGTDVNVWIRGCRL and 2 copies of VQLVQSGVEVKKPGASVKVSCKASGYTFTNYYMYWVRQAPGQGLEWMGGINPSNGGTNFNEKFKNRVTLTTDSSTTTAYMELKSLQFDDTAVYYCARRDYRFDMGFDYWGQGTTVTVSS
+"""
+
 
 def run():
     """
     Run the crew.
     """
     inputs = {
-        'inputs': example_input1
+        'message': example_input1
     }
     crew = ResearchAssistant().crew()
     crew.kickoff(inputs=inputs)

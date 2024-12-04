@@ -65,7 +65,7 @@ def preprare_directory(temp, delete_old=True):
 
 class PreprocessInput(BaseModel):
     """Input schema for Preprocess."""
-    protein_name: str = Field(default="protein_1", description="Name or ID of the sequence. Try to infer from user input. If not possible, you can use 'protein_1', 'protein_2', etc.")
+    structure_name: str = Field(default="structure1", description="Name or ID of the structure to predict. Try to infer from user input. If not possible, you can use 'structure1', 'structure2', etc.")
     num_chains: int = Field(default = 0, description="Number of chains in the protein")
     sequences: List[str] = Field(description="List of input sequences from the user", default = [])
 
@@ -78,7 +78,7 @@ class PreprocessInput(BaseModel):
 
 class PreprocessOutput(BaseModel):
     """Output schema for Preprocess."""
-    protein_name: str = Field(description="Name of the sequence", default = "protein_1")
+    structure_name: str = Field(description="Name of the structure to predict", default = "structure1")
     num_chains: int = Field(description="Number of chains in the protein", default = 0)
     clean_sequences: List[str] = Field(description="List of cleaned sequences", default = [])
 
@@ -118,7 +118,7 @@ class Preprocess(BaseTool):
         
         # return metadata
 
-    def _run(self, protein_name: str, num_chains: int, sequences: List[str]) -> str:
+    def _run(self, structure_name: str, num_chains: int, sequences: List[str]) -> str:
 
         # sequence_metadata = {}
 
@@ -146,7 +146,7 @@ class Preprocess(BaseTool):
 
         # return the result
         result = PreprocessOutput(
-            protein_name=protein_name,
+            structure_name=structure_name,
             num_chains=num_chains,
             clean_sequences=clean_sequences
             # sequence_metadata=sequence_metadata
@@ -164,9 +164,9 @@ class ModelSelectionOutput(BaseModel):
 
 class ESMFoldToolInput(BaseModel):
     """Input schema for ESMFoldTool."""
-    selected_models: List[str] = Field(description="List of selected models", default = [])
-    protein_name: str = Field(description="Name of the protein", default = "")
-    sequence: str = Field(description="Clean amino acid sequence of the protein", default = None)
+    selected_models: List[str] = Field(..., description="List of selected models")
+    structure_name: str = Field(..., description="Name of the structure to predict")
+    sequence: str = Field(..., description="Clean amino acid sequence of this structure")
 
 
 class ESMFoldPlayground:
@@ -227,7 +227,7 @@ class ESMFoldPlayground:
         return response
     
 
-def predict_with_esmfold(sequence, output_dir="output/esmfold_result", output_file_name="predicted_protein.pdb", delete_old_dir=True):
+def predict_with_esmfold(sequence, output_dir="output/esmfold_result", output_file_name="predicted_structure.pdb", delete_old_dir=True):
     # get NGC API key
     NGC_API_KEY = os.getenv("NVIDIA_NIM_API_KEY")
 
@@ -274,7 +274,7 @@ class ESMFoldTool(BaseTool):
     description: str = "Use ESMFold to predict the structure of a protein"
     args_schema: Type[BaseModel] = ESMFoldToolInput
 
-    def _run(self, selected_models: List[str], protein_name: str, sequence: str) -> str:
+    def _run(self, selected_models: List[str], structure_name: str, sequence: str) -> str:
 
         from research_assistant.tools.helpers import get_run_id
         # directory to save the output
@@ -293,10 +293,10 @@ class ESMFoldTool(BaseTool):
             result.success = False
         else:
             # generate output file name
-            output_file_name= f"{protein_name}.pdb"
+            output_file_name= f"{structure_name}.pdb"
             
             # predict the structure
-            logger.info(f"Predicting the structure of {protein_name} with ESMFold")
+            logger.info(f"Predicting the structure of {structure_name} with ESMFold")
             pred_r = predict_with_esmfold(sequence, output_dir=output_base_dir, output_file_name=output_file_name)
 
             # update the result
@@ -317,9 +317,9 @@ class FoldToolOutput(BaseModel):
 
 class BoltzToolInput(BaseModel):
     """Input schema for BoltzTool."""
-    selected_models: List[str] = Field(description="List of selected models", default = [])
-    protein_name: str = Field(description="Name of the protein", default = "")
-    sequences: List[str] = Field(description="List of all clean amino acid sequences in this protein", default = [])
+    selected_models: List[str] = Field(..., description="List of selected models")
+    structure_name: str = Field(..., description="Name of the structure to predict")
+    sequences: List[str] = Field(..., description="List of all clean amino acid sequences in this structure")
 
 def predict_with_boltz(sequences, yaml_dir = "input/boltz_input", yaml_file_name = "protein1.yaml", result_dir="output/boltz_result/protein1", delete_old_dir=False):
     """
@@ -381,11 +381,11 @@ def predict_with_boltz(sequences, yaml_dir = "input/boltz_input", yaml_file_name
 
 
 class BoltzTool(BaseTool):
-    name: str = "Using Boltz to predict protein structure"
+    name: str = "Use Boltz to predict protein structure"
     description: str = "Use Boltz to predict the structure of a protein"
     args_schema: Type[BaseModel] = BoltzToolInput
 
-    def _run(self, selected_models: List[str], protein_name: str, sequences: List[str]) -> str:
+    def _run(self, selected_models: List[str], structure_name: str, sequences: List[str]) -> str:
 
         # get run ID
 
@@ -414,10 +414,10 @@ class BoltzTool(BaseTool):
         else:
             # generate output file name
             result_dir = output_base_dir
-            yaml_file_name = f"{protein_name}.yaml"
+            yaml_file_name = f"{structure_name}.yaml"
             
             # predict the structure
-            logger.info(f"Predicting the structure of {protein_name} with Boltz")
+            logger.info(f"Predicting the structure of {structure_name} with Boltz")
             pred_r = predict_with_boltz(
                 sequences=sequences, 
                 yaml_dir=yaml_dir,
@@ -438,7 +438,7 @@ class BoltzTool(BaseTool):
 #     Input schema for IgFoldTool
 #     """
 #     selected_models: List[str] = Field(description="List of selected models", default = [])
-#     protein_name: str = Field(description="Name of the protein", default = "")
+#     structure_name: str = Field(description="Name of the protein", default = "")
 #     vh_sequence: str = Field(description="Clean amino acid sequence of the VH chain that will be used for prediction", default = None)
 #     vl_sequence: str = Field(description="Clean amino acid sequence of the VL chain that will be used for prediction", default = None)
 
@@ -501,7 +501,7 @@ class BoltzTool(BaseTool):
 #     description: str = "Use IgFold to predict the structure of an antibody"
 #     args_schema: Type[BaseModel] = IgFoldToolInput
 
-#     def _run(self, selected_models: List[str], protein_name: str, vh_sequence: str, vl_sequence: str) -> str:
+#     def _run(self, selected_models: List[str], structure_name: str, vh_sequence: str, vl_sequence: str) -> str:
 
 #         output_base_dir = "output/igfold_result"
 
@@ -516,10 +516,10 @@ class BoltzTool(BaseTool):
 #             result.success = False
 #         else:
 #             # generate output file name
-#             output_file_name= f"{protein_name}.pdb"
+#             output_file_name= f"{structure_namememe}.pdb"
             
 #             # predict the structure
-#             logger.info(f"Predicting the structure of {protein_name} with IgFold")
+#             logger.info(f"Predicting the structure of {structure_name} with IgFold")
 #             pred_r = predict_with_igfold(vh_sequence, vl_sequence, output_dir=output_base_dir, output_file_name=output_file_name)
 
 #             # update the result

@@ -1,0 +1,12 @@
+## License
+
+### BioNeMo framework and NIM license
+
+BioNeMo Framework is an open-source software. See [LICENSE](https://github.com/NVIDIA/bionemo-framework/blob/main/LICENSE/license.txt) for license details. 
+
+All NVIDIA NIMs (BioNeMo, LLMs, etc) are free to evaluate. A NVAIE license is required for production usage. See [NVIDIA NIM FAQ](https://forums.developer.nvidia.com/t/nvidia-nim-faq/300317/1) for more details
+
+
+### Boltz-1 License
+
+See [Boltz-1 Github Repository](https://github.com/jwohlwend/boltz/blob/main/LICENSE) for license details. 

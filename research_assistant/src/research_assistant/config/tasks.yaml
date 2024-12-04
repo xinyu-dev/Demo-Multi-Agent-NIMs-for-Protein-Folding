@@ -1,26 +1,57 @@
 preprocess_task:
   description: >
     Follow the following steps: 
-    1. First, the user will try to give you some sequences in their inputs: {inputs}. You will try to extrat the protein name and sequence 
-    Pay close attention to the schema of PreprocessInput on how you should format the input. For example: 
-    Example 1:  
+    1. First, the user will try to give you some sequences of a structure. 
+    A structure can contain a single protein sequence from a single protein, or different proteins. 
+    You will try to extrat the protein name (if single chain), or protein complex name (if multiple chains), and their sequence. 
+    If you're not sure about the name, just name it "structure1"
+    Pay close attention to the schema of PreprocessInput on how you should format the input. 
+    Remember, you just need a name for the structure, and collect all its sequences in to a list of strings. 
+    For example: 
+    1. Example 1:  
     user inputs: 
-    Predict structure of my peptide: MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS
-    In this case, you can infer that the peptide name is "myPeptide", and sequence is "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS". You should generate the following input for the Preprocess tool, based on PreprocessInput schema: 
-    protein_name: "myPeptide"
+    Predict structure of my peptide: seq1
+    Your output should be: 
+    structure_name: "myPeptide"
     num_chains: 1
-    sequences: ["MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS"]
-    Example 2: user inputs: 
+    sequences: ["seq1"]
+    2. Example 2: user inputs: 
     >mAB1001 heavy chain
-    MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS
+    seq1
     >mAB1001 light chain
-    MVLSPADKTNVKAAWGK
-    First, you should receognize that this is fasta format. Then you can infer that the protein name is "mAb1001", and there are 2 chains. You should generate the following input for the Preprocess tool: 
-    protein_name: "mAB1001"
+    seq2
+    Your output should be: 
+    structure_name: "mAB1001"
     num_chains: 2
-    sequences: ["MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLS", "MVLSPADKTNVKAAWGK"]
+    sequences: ["seq1", "seq2"]
+    3. Example 3: protein complex: 
+    user inputs: 
+    >heavy chain
+    seq1
+    >light chain
+    seq2
+    > target
+    seq3
+    Your output should be: 
+    structure_name: "protein_complex1"
+    num_chains: 3
+    sequences: ["seq1", "seq2", "seq3"]
+    Example 4: 
+    user inputs: 
+    I want to predict a homodimer of seq1
+    Your output should be: 
+    structure_name: "homodimer1"
+    num_chains: 2
+    sequences: ["seq1", "seq1"]
+    Example 5: 
+    I want to predict a complex consisting of seq1, and 2x seq2
+    Your output should be: 
+    structure_name: "complex1"
+    num_chains: 3
+    sequences: ["seq1", "seq2", "seq2"]
     2. Then pass the formatted input to the Preprocess tool. 
     3. Report the results.
+    Now you can start. Here is the actual input from the user: {message}
   expected_output: >
     A concise summary of bullet points:   
     1) Name of the protein
@@ -67,7 +98,7 @@ boltz_task:
     Invoke Boltz tool to predict the structure of the protein. 
     1. If Boltz is not among selected_models, do nothing. No need to invoke the Boltz tool. 
     2. If Boltz is among selected_models, first retrieve the clean protein sequence in the context. Pay close attention to BoltzToolInput schema. 
-    3. then invoke Boltz tool to predict the structure of the protein.
+    3. then use Boltz tool to predict the structure of the protein.
     4. If Boltz tool is called, based on the tool result, report back to human the file path of the saved PDB file of the predicted structure. 
   expected_output: >
     A concise report of: 
@@ -81,7 +112,7 @@ reporter_task:
     Report the final results to the user. 
   expected_output: >
     A concise bullet point summary of the following: 
-    1. Start with a title: Final Report: 
+    1. Start with "Final Report: "
     2. Make a bullet point for each of folding models provided in the context
     3. For each model, make a bullet point for the following: 1) whether model is selected for the protein 2) if selected, whether the prediction is successful, 3) if successful, file path or folder path of the saved results. 
   agent: reporter_agent
