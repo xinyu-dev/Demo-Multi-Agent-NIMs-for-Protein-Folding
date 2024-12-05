@@ -296,7 +296,7 @@ class ESMFoldTool(BaseTool):
             output_file_name= f"{structure_name}.pdb"
             
             # predict the structure
-            logger.info(f"Predicting the structure of {structure_name} with ESMFold")
+            logger.warning(f"Predicting the structure of {structure_name} with ESMFold")
             pred_r = predict_with_esmfold(sequence, output_dir=output_base_dir, output_file_name=output_file_name)
 
             # update the result
@@ -417,7 +417,7 @@ class BoltzTool(BaseTool):
             yaml_file_name = f"{structure_name}.yaml"
             
             # predict the structure
-            logger.info(f"Predicting the structure of {structure_name} with Boltz")
+            logger.warning(f"Predicting the structure of {structure_name} with Boltz")
             pred_r = predict_with_boltz(
                 sequences=sequences, 
                 yaml_dir=yaml_dir,

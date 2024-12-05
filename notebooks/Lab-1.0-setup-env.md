@@ -71,3 +71,4 @@ This method is similar to 1.2, but instead generates the API key directly in the
 2. Rename this file to `.env` so that it can be loaded correctly. 
 
 
+Now you can proceed to Lab 1.1!
