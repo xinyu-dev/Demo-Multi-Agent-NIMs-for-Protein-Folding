@@ -1,1 +1,1 @@
-# 2025-01-biologic-summit-workshop
+# Demo using LLM NIM and BioNeMO NIMs to construct a Multi-Agent Workflow for Protein folding
